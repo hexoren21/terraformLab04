@@ -11,8 +11,8 @@ resource "aws_instance" "example" {
 		    #!/bin/bash
 		    sudo apt update
 		    sudo apt install apache2 wget unzip -y
-		    sudo sed -i 's/80/8080/g' /etc/apache2/ports.conf
-                    sudo sed -i 's/:80/:8080/g' /etc/apache2/sites-available/000-default.conf
+		    sudo sed -i 's/80/${var.server_port}/g' /etc/apache2/ports.conf
+            sudo sed -i 's/:80/:${var.server_port}/g' /etc/apache2/sites-available/000-default.conf
 		    wget https://www.tooplate.com/zip-templates/2135_mini_finance.zip
 		    unzip 2135_mini_finance.zip
 		    sudo cp -r 2135_mini_finance/* /var/www/html/
@@ -29,8 +29,8 @@ resource "aws_security_group" "instance" {
 	name = "terraform-example-instance"
 	
 	ingress {
-	from_port = 8080
-	to_port = 8080
+	from_port = var.server_port
+	to_port = var.server_port
 	protocol = "tcp"
 	cidr_blocks = ["178.235.242.60/32"]
 	}
