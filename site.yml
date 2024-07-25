@@ -1,0 +1,52 @@
+- hosts: web
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+    
+    - name: Install Apache and other packages
+      apt:
+        name:
+          - apache2
+          - wget
+          - unzip
+        state: present
+
+    - name: Download website template
+      get_url:
+        url: https://www.tooplate.com/zip-templates/2135_mini_finance.zip
+        dest: /tmp/2135_mini_finance.zip
+
+    - name: Unzip website template
+      unarchive:
+        src: /tmp/2135_mini_finance.zip
+        dest: /tmp
+        remote_src: yes
+
+    - name: Copy website files to web server root
+      copy:
+        src: /tmp/2135_mini_finance/
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: 0755
+        remote_src: yes
+
+    - name: Update Apache configuration to listen on custom port
+      lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: '^Listen 80$'
+        line: "Listen {{ server_port }}"
+        state: present
+
+    - name: Update Apache virtual host configuration
+      replace:
+        path: /etc/apache2/sites-available/000-default.conf
+        regexp: '(:80)'
+        replace: "(:{{ server_port }})"
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
