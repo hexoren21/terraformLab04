@@ -1,0 +1,14 @@
+---
+- name: Install required Python packages
+  hosts: web
+  become: yes
+  tasks:
+    - name: Ensure Python pip is installed
+      apt:
+        name: python3-pip
+        state: present
+    
+    - name: Install Python six module
+      pip:
+        name: six
+        state: present
