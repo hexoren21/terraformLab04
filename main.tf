@@ -52,7 +52,7 @@ resource "aws_instance" "WEB-toople" {
       user        = local.ssh_user
       private_key = file(local.private_key_path)
 
-      host        = aws_instance.WEN-toople.public_ip
+      host        = aws_instance.WEB-toople.public_ip
     }
   }
   provisioner "local-exec" {
@@ -62,6 +62,6 @@ resource "aws_instance" "WEB-toople" {
 
 
 output "public_ip" {
-  value       = aws_instance.example.public_ip
+  value       = aws_instance.WEB-toople.public_ip
   description = "Public address server:"
 }
