@@ -1,5 +1,5 @@
 locals {
-  ssh_user = "ubuntu"
+  ssh_user         = "ubuntu"
   private_key_path = "~/.ssh/web02.pem"
 }
 
@@ -33,11 +33,11 @@ resource "aws_security_group" "instance" {
 }
 
 resource "aws_instance" "WEB-toople" {
-  ami                         = "ami-0e872aee57663ae2d"
-  instance_type               = "t2.micro"
-  key_name                    = "web02"
-  vpc_security_group_ids      = [aws_security_group.instance.id]
-	
+  ami                    = "ami-0e872aee57663ae2d"
+  instance_type          = "t2.micro"
+  key_name               = "web02"
+  vpc_security_group_ids = [aws_security_group.instance.id]
+
   user_data_replace_on_change = true
 
   tags = {
@@ -46,8 +46,28 @@ resource "aws_instance" "WEB-toople" {
 
   user_data = <<-EOF
               #!/bin/bash
+
+              # Function to check and wait for the dpkg lock to be released
+              wait_for_dpkg_lock() {
+              while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+                echo "Waiting for other apt-get processes to finish..."
+                sleep 5
+              done
+              while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ; do
+                echo "Waiting for other apt-get processes to finish..."
+                sleep 5
+              done
+              }
+
+              # Wait for dpkg lock to be released
+              wait_for_dpkg_lock
+
+              # Update package list and install Python3 and pip3
               sudo apt update
+              wait_for_dpkg_lock
               sudo apt install -y python3 python3-pip
+
+              # Install Python packages
               pip3 install six requests
               EOF
 
@@ -59,7 +79,7 @@ resource "aws_instance" "WEB-toople" {
       user        = local.ssh_user
       private_key = file(local.private_key_path)
 
-      host        = aws_instance.WEB-toople.public_ip
+      host = aws_instance.WEB-toople.public_ip
     }
   }
   provisioner "local-exec" {
