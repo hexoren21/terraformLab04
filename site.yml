@@ -2,7 +2,7 @@
   remote_user: ubuntu
   become: yes
   tasks:
-     - name: Ensure Python3 and pip are installed
+    - name: Ensure Python3 and pip are installed
       apt:
         name: 
           - python3
@@ -13,7 +13,7 @@
     - name: Install six module
       pip:
         name: six
-        
+
     - name: Update apt cache
       apt:
         update_cache: yes
