@@ -1,18 +1,10 @@
-provider "aws" {
-  region = "eu-central-1"
+locals {
+  ssh_user = "ubuntu"
+  private_key_path = "~/.ssh/web02.pem"
 }
 
-resource "aws_instance" "example" {
-  ami                         = "ami-0e872aee57663ae2d"
-  instance_type               = "t2.micro"
-  key_name                    = "web02"
-  vpc_security_group_ids      = [aws_security_group.instance.id]
-	
-  user_data_replace_on_change = true
-
-  tags = {
-    Name = "terraform-example"
-  }
+provider "aws" {
+  region = "eu-central-1"
 }
 
 resource "aws_security_group" "instance" {
@@ -37,6 +29,34 @@ resource "aws_security_group" "instance" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "WEB-toople" {
+  ami                         = "ami-0e872aee57663ae2d"
+  instance_type               = "t2.micro"
+  key_name                    = "web02"
+  vpc_security_group_ids      = [aws_security_group.instance.id]
+	
+  user_data_replace_on_change = true
+
+  tags = {
+    Name = "terraform-example"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["echo 'Wait until SSH is ready'"]
+
+    connection {
+      type        = "ssh"
+      user        = local.ssh_user
+      private_key = file(local.private_key_path)
+
+      host        = aws_instance.WEN-toople.public_ip
+    }
+  }
+  provisioner "local-exec" {
+    command = "ansible-playbook  -i ${aws_instance.WEB-toople.public_ip}, --private-key ${local.private_key_path} site.yml"
   }
 }
 
