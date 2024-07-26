@@ -46,12 +46,11 @@ resource "aws_instance" "WEB-toople" {
 
   user_data = <<-EOF
               #!/bin/bash
-              sudo apt-get update
-              sudo apt-get install -y python3-pip
-              sudo pip3 install ansible
-              sudo pip3 install six
+              sudo apt update
+              sudo apt install -y python3 python3-pip
+              pip3 install six requests
               EOF
-              
+
   provisioner "remote-exec" {
     inline = ["echo 'Wait until SSH is ready'"]
 
