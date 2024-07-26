@@ -44,6 +44,14 @@ resource "aws_instance" "WEB-toople" {
     Name = "terraform-example"
   }
 
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo apt-get update
+              sudo apt-get install -y python3-pip
+              sudo pip3 install ansible
+              sudo pip3 install six
+              EOF
+              
   provisioner "remote-exec" {
     inline = ["echo 'Wait until SSH is ready'"]
 
